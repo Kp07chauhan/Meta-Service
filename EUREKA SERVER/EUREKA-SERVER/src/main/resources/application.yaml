@@ -1,0 +1,13 @@
+server:
+  port: 8761
+
+spring:
+  application:
+    name: EUREKA-SERVER
+
+eureka:
+  client:
+    register-with-eureka: false   # the server itself shouldn't register as a client
+    fetch-registry: false
+  server:
+    enable-self-preservation: false  # fine for local dev; leave default (true) in prod
