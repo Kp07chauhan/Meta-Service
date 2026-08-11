@@ -5,9 +5,12 @@ import com.crud.dto.ResponseDto;
 import com.crud.entity.User;
 import com.crud.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import lombok.Builder;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -38,6 +41,42 @@ public class UserService {
                 savedUser.getEmail(),
                 savedUser.getCollege()
         );
+    }
+
+    public List<ResponseDto> createUsers(List<RegisterDto> registerDtos) {
+
+        List<ResponseDto> responseList = new ArrayList<>();
+
+        for (RegisterDto registerDto : registerDtos) {
+
+            if (userRepository.existsByEmail(registerDto.getEmail())) {
+                throw new RuntimeException(
+                        "User already exists with email: " + registerDto.getEmail()
+                );
+            }
+
+            User user = new User();
+            user.setName(registerDto.getName());
+            user.setMotherName(registerDto.getMotherName());
+            user.setFatherName(registerDto.getFatherName());
+            user.setEmail(registerDto.getEmail());
+            user.setCollege(registerDto.getCollege());
+
+            User savedUser = userRepository.save(user);
+
+            ResponseDto responseDto = new ResponseDto(
+                    savedUser.getId(),
+                    savedUser.getName(),
+                    savedUser.getMotherName(),
+                    savedUser.getFatherName(),
+                    savedUser.getEmail(),
+                    savedUser.getCollege()
+            );
+
+            responseList.add(responseDto);
+        }
+
+        return responseList;
     }
 
     public List<ResponseDto> getUsers(){
@@ -99,4 +138,18 @@ public class UserService {
                 .build();
     }
 
+    public List<ResponseDto> userList(Pageable pageable) {
+        List<User> users = userRepository.findAll(pageable).getContent();
+
+        return users.stream()
+                .map(user -> ResponseDto.builder()
+                        .id(user.getId())
+                        .name(user.getName())
+                        .motherName(user.getMotherName())
+                        .fatherName(user.getFatherName())
+                        .email(user.getEmail())
+                        .college(user.getCollege())
+                        .build())
+                .toList();
+    }
 }
