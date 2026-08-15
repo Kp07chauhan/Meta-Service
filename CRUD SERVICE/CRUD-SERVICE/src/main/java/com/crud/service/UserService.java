@@ -5,11 +5,9 @@ import com.crud.dto.ResponseDto;
 import com.crud.entity.User;
 import com.crud.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.Nullable;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import lombok.Builder;
 
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,8 +136,20 @@ public class UserService {
                 .build();
     }
 
-    public List<ResponseDto> userList(Pageable pageable) {
-        List<User> users = userRepository.findAll(pageable).getContent();
+    public List<ResponseDto> userList(String search, Pageable pageable) {
+
+        List<User> users = new ArrayList<>();
+
+        if (search == null || search.isBlank()) {
+
+            users = userRepository.findAll(pageable).getContent();
+
+        } else {
+
+            users = userRepository
+                    .findByName(search,pageable)
+                    .getContent();
+        }
 
         return users.stream()
                 .map(user -> ResponseDto.builder()

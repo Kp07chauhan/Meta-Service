@@ -5,6 +5,8 @@ import com.crud.dto.ResponseDto;
 import com.crud.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,9 +39,20 @@ public class UserController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<ResponseDto>> usersList(@RequestParam(required = false, defaultValue = "1") int pageNo, @RequestParam(required = false, defaultValue = "5") int pageSize){
+    public ResponseEntity<List<ResponseDto>> usersList(@RequestParam(required = false, defaultValue = "1") int pageNo,
+                                                       @RequestParam(required = false, defaultValue = "5") int pageSize,
+                                                       @RequestParam(required = false,defaultValue = "id") String sortBy,
+                                                       @RequestParam(required = false,defaultValue = "ASC") String sortDir,
+                                                       @RequestParam(required = false) String search){
+        Sort sort = null;
+        if (sortDir.equalsIgnoreCase("ASC")) {
+            sort = sort.by(sortBy).ascending();
+        }else {
+            sort = sort.by(sortBy).descending();
+        }
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(userService.userList(PageRequest .of(pageNo-1,pageSize)));
+                .body(userService.userList(search,pageable));
     }
 
     @GetMapping("/get/{id}")
